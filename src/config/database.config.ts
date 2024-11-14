@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { Installs } from 'src/installs/entities/installs.entity';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,6 +11,6 @@ export const databaseConfig: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
-  entities: [],
+  entities: [Installs],
   logging: false,
 };
