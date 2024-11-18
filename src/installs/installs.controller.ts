@@ -1,13 +1,7 @@
 import { InstallsService } from './installs.service';
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  InternalServerErrorException,
-  Query,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { Installs } from './entities/installs.entity';
-import { InstallStats } from './types/installs.types';
+import { CityDistribution, InstallStats } from './types/installs.types';
 
 @Controller('analytics')
 export class InstallsController {
@@ -15,11 +9,17 @@ export class InstallsController {
 
   @Get('/apps')
   getAllApps(): Promise<string[]> {
-    try {
-      return this.installsService.getAllApps();
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch applications');
-    }
+    return this.installsService.getAllApps();
+  }
+
+  @Get('/installs-by-app')
+  getInstallsByApp(
+    @Query('app_name') appName: string,
+  ): Promise<{ total_installs: number; city_distribution: CityDistribution }> {
+    if (!appName)
+      throw new BadRequestException('The app_name parameter is required');
+
+    return this.installsService.getInstallsByApp(appName);
   }
 
   @Get('/installs-by-time')
@@ -46,43 +46,33 @@ export class InstallsController {
   }
 
   @Get('/geo-analysis')
-  async getGeoAnalysis(
+  getGeoAnalysis(
     @Query('app_name') appName: string,
   ): Promise<{ city: string; installs: number }[]> {
-    try {
-      return await this.installsService.getGeoAnalysis(appName);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to fetch geographic analysis data',
-      );
-    }
+    if (!appName)
+      throw new BadRequestException('The app_name parameter is required');
+
+    return this.installsService.getGeoAnalysis(appName);
   }
 
   @Get('/idfv-distribution')
-  async getIdfvDistribution(
-    @Query('app_name') appName: string | undefined,
+  getIdfvDistribution(
+    @Query('app_name') appName: string,
   ): Promise<InstallStats> {
     if (!appName)
       throw new BadRequestException('The app_name parameter is required');
 
-    return await this.installsService.getIdfvDistribution(appName);
+    return this.installsService.getIdfvDistribution(appName);
   }
 
   @Get('/installs-metadata')
-  async getInstallsMetadata(
+  getInstallsMetadata(
     @Query('from') from: string,
     @Query('to') to: string,
   ): Promise<Partial<Installs>[]> {
     if (!from || !to)
       throw new BadRequestException('Missing required query parameters');
 
-    try {
-      const installsMetadata =
-        await this.installsService.getMetadataByDateRange(from, to);
-
-      return installsMetadata;
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
-    }
+    return this.installsService.getMetadataByDateRange(from, to);
   }
 }

@@ -8,3 +8,7 @@ export interface InstallStats {
   is_lat_distribution: LatDistribution;
   percentage_with_lat_enabled: number;
 }
+
+export interface CityDistribution {
+  [city: string]: number;
+}

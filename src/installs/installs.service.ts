@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Installs } from './entities/installs.entity';
-import { InstallStats } from './types/installs.types';
+import { InstallStats, CityDistribution } from './types/installs.types';
 
 @Injectable()
 export class InstallsService {
@@ -21,6 +21,40 @@ export class InstallsService {
       return result.map((row) => row.app_name);
     } catch (error) {
       throw new InternalServerErrorException('Failed to process applications');
+    }
+  }
+
+  async getInstallsByApp(
+    appName: string,
+  ): Promise<{ total_installs: number; city_distribution: CityDistribution }> {
+    try {
+      const totalInstalls = await this.installsRepository
+        .createQueryBuilder('installs')
+        .where('installs.app_name = :appName', { appName })
+        .getCount();
+
+      const cityDistributionRaw = await this.installsRepository
+        .createQueryBuilder('installs')
+        .select('installs.city', 'city')
+        .addSelect('COUNT(*)', 'installs')
+        .where('installs.app_name = :appName', { appName })
+        .groupBy('installs.city')
+        .orderBy('installs', 'DESC')
+        .getRawMany();
+
+      const cityDistribution: CityDistribution = {};
+      cityDistributionRaw.forEach((row) => {
+        cityDistribution[row.city] = row.installs;
+      });
+
+      return {
+        total_installs: totalInstalls,
+        city_distribution: cityDistribution,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed processing installs by app',
+      );
     }
   }
 
@@ -72,7 +106,9 @@ export class InstallsService {
         installs: row.installs,
       }));
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(
+        'Failed to fetch installs by device',
+      );
     }
   }
 
@@ -128,7 +164,9 @@ export class InstallsService {
         percentage_with_lat_enabled: percentageWithLatEnabled,
       };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(
+        'Failed to fetch idfv distribution data',
+      );
     }
   }
 
@@ -150,7 +188,9 @@ export class InstallsService {
         .orderBy('installs.date', 'ASC')
         .getRawMany();
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(
+        'Failed to fetch installs metadata',
+      );
     }
   }
 }
