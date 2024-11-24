@@ -2,10 +2,11 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Installs } from './entities/installs.entity';
+import { InstallsServiceInterface } from './types/installs-service.interface';
 import { InstallStats, CityDistribution } from './types/installs.types';
 
 @Injectable()
-export class InstallsService {
+export class InstallsService implements InstallsServiceInterface {
   constructor(
     @InjectRepository(Installs)
     private readonly installsRepository: Repository<Installs>,

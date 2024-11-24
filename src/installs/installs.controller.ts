@@ -1,5 +1,10 @@
-import { InstallsService } from './installs.service';
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Inject,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
@@ -8,12 +13,16 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Installs } from './entities/installs.entity';
+import { InstallsServiceInterface } from './types/installs-service.interface';
 import { CityDistribution, InstallStats } from './types/installs.types';
 
 @ApiTags('analytics')
 @Controller('analytics')
 export class InstallsController {
-  constructor(private readonly installsService: InstallsService) {}
+  constructor(
+    @Inject('InstallsServiceInterface')
+    private readonly installsService: InstallsServiceInterface,
+  ) {}
 
   @Get('/apps')
   @ApiOkResponse({
