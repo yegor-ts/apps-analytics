@@ -7,12 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Installs } from 'src/installs/entities/installs.entity';
 
 @Module({
-  imports: [
-    ConfigModule,
-    HttpModule,
-    InstallsModule,
-    TypeOrmModule.forFeature([Installs]),
-  ],
+  imports: [ConfigModule, HttpModule, InstallsModule, TypeOrmModule.forFeature([Installs])],
   providers: [AppsflyerService],
 })
 export class AppsflyerModule {}

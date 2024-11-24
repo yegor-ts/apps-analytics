@@ -45,10 +45,7 @@ export class AppsflyerService {
               await this.installsRepository.save(batch);
               batch = [];
             } catch (error) {
-              throw new HttpException(
-                error.message,
-                HttpStatus.INTERNAL_SERVER_ERROR,
-              );
+              throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
             } finally {
               csvStream.resume();
             }
@@ -61,17 +58,11 @@ export class AppsflyerService {
             }
             this.logger.log('Successfully fetched and saved to the database');
           } catch (error) {
-            throw new HttpException(
-              error.message,
-              HttpStatus.INTERNAL_SERVER_ERROR,
-            );
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
           }
         })
         .on('error', (error) => {
-          throw new HttpException(
-            error.message,
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+          throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);

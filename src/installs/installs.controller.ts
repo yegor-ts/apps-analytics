@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  Inject,
-  Query,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Get, Inject, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
@@ -53,8 +47,7 @@ export class InstallsController {
   getInstallsByApp(
     @Query('app_name') appName: string,
   ): Promise<{ total_installs: number; city_distribution: CityDistribution }> {
-    if (!appName)
-      throw new BadRequestException('The app_name parameter is required');
+    if (!appName) throw new BadRequestException('The app_name parameter is required');
 
     return this.installsService.getInstallsByApp(appName);
   }
@@ -89,8 +82,7 @@ export class InstallsController {
     @Query('from') from: string,
     @Query('to') to: string,
   ): Promise<{ period: string; total_installs: number }[]> {
-    if (!appName || !from || !to)
-      throw new BadRequestException('Missing required query parameters');
+    if (!appName || !from || !to) throw new BadRequestException('Missing required query parameters');
 
     return this.installsService.getAppInstallsByTime(appName, from, to);
   }
@@ -119,8 +111,7 @@ export class InstallsController {
     @Query('from') from: string,
     @Query('to') to: string,
   ): Promise<{ device_model: string; installs: number }[]> {
-    if (!from || !to)
-      throw new BadRequestException('Missing required query parameters');
+    if (!from || !to) throw new BadRequestException('Missing required query parameters');
 
     return this.installsService.getInstallsByDevice(from, to);
   }
@@ -132,8 +123,7 @@ export class InstallsController {
     required: true,
   })
   @ApiOkResponse({
-    description:
-      'Successfully fetched the geographical distribution of installs.',
+    description: 'Successfully fetched the geographical distribution of installs.',
   })
   @ApiBadRequestResponse({
     description: 'Bad Request: The "app_name" query parameter is required.',
@@ -141,11 +131,8 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getGeoAnalysis(
-    @Query('app_name') appName: string,
-  ): Promise<{ city: string; installs: number }[]> {
-    if (!appName)
-      throw new BadRequestException('The app_name parameter is required');
+  getGeoAnalysis(@Query('app_name') appName: string): Promise<{ city: string; installs: number }[]> {
+    if (!appName) throw new BadRequestException('The app_name parameter is required');
 
     return this.installsService.getGeoAnalysis(appName);
   }
@@ -165,11 +152,8 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getIdfvDistribution(
-    @Query('app_name') appName: string,
-  ): Promise<InstallStats> {
-    if (!appName)
-      throw new BadRequestException('The app_name parameter is required');
+  getIdfvDistribution(@Query('app_name') appName: string): Promise<InstallStats> {
+    if (!appName) throw new BadRequestException('The app_name parameter is required');
 
     return this.installsService.getIdfvDistribution(appName);
   }
@@ -194,12 +178,8 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getInstallsMetadata(
-    @Query('from') from: string,
-    @Query('to') to: string,
-  ): Promise<Partial<Installs>[]> {
-    if (!from || !to)
-      throw new BadRequestException('Missing required query parameters');
+  getInstallsMetadata(@Query('from') from: string, @Query('to') to: string): Promise<Partial<Installs>[]> {
+    if (!from || !to) throw new BadRequestException('Missing required query parameters');
 
     return this.installsService.getMetadataByDateRange(from, to);
   }
