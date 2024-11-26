@@ -11,7 +11,6 @@ import { InstallsController } from './installs.controller';
       provide: 'InstallsServiceInterface',
       useClass: InstallsService,
     },
-    InstallsService,
   ],
   controllers: [InstallsController],
 })

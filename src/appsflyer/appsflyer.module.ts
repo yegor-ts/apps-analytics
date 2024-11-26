@@ -8,6 +8,11 @@ import { Installs } from 'src/installs/entities/installs.entity';
 
 @Module({
   imports: [ConfigModule, HttpModule, InstallsModule, TypeOrmModule.forFeature([Installs])],
-  providers: [AppsflyerService],
+  providers: [
+    {
+      provide: 'AppsflyerServiceInterface',
+      useClass: AppsflyerService,
+    },
+  ],
 })
 export class AppsflyerModule {}
