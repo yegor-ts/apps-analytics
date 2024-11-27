@@ -5,10 +5,11 @@ import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Installs } from 'src/installs/entities/installs.entity';
+import { AppsflyerServiceInterface } from './types/appsflyer.service.interface';
 import * as csv from 'csv-parser';
 
 @Injectable()
-export class AppsflyerService {
+export class AppsflyerService implements AppsflyerServiceInterface {
   private readonly apiToken = this.configService.get('API_TOKEN');
   private readonly baseUrl = this.configService.get('API_URL');
   private readonly logger = new Logger(AppsflyerService.name);
@@ -21,7 +22,7 @@ export class AppsflyerService {
   ) {}
 
   @Cron(CronExpression.EVERY_30_SECONDS)
-  async fetchData() {
+  async fetchData(): Promise<void> {
     const BATCH_SIZE = 100;
 
     const requestUrl = `${this.baseUrl}key=${this.apiToken}`;
