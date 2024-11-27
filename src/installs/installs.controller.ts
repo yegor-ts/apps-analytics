@@ -44,7 +44,7 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getInstallsByApp(
+  async getInstallsByApp(
     @Query('app_name') appName: string,
   ): Promise<{ total_installs: number; city_distribution: CityDistribution }> {
     if (!appName) throw new BadRequestException('The app_name parameter is required');
@@ -77,7 +77,7 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getAppInstallsByTime(
+  async getAppInstallsByTime(
     @Query('app_name') appName: string,
     @Query('from') from: string,
     @Query('to') to: string,
@@ -107,7 +107,7 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getInstallsByDevices(
+  async getInstallsByDevices(
     @Query('from') from: string,
     @Query('to') to: string,
   ): Promise<{ device_model: string; installs: number }[]> {
@@ -131,7 +131,7 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getGeoAnalysis(@Query('app_name') appName: string): Promise<{ city: string; installs: number }[]> {
+  async getGeoAnalysis(@Query('app_name') appName: string): Promise<{ city: string; installs: number }[]> {
     if (!appName) throw new BadRequestException('The app_name parameter is required');
 
     return this.installsService.getGeoAnalysis(appName);
@@ -152,7 +152,7 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getIdfvDistribution(@Query('app_name') appName: string): Promise<InstallStats> {
+  async getIdfvDistribution(@Query('app_name') appName: string): Promise<InstallStats> {
     if (!appName) throw new BadRequestException('The app_name parameter is required');
 
     return this.installsService.getIdfvDistribution(appName);
@@ -178,7 +178,7 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  getInstallsMetadata(@Query('from') from: string, @Query('to') to: string): Promise<Partial<Installs>[]> {
+  async getInstallsMetadata(@Query('from') from: string, @Query('to') to: string): Promise<Partial<Installs>[]> {
     if (!from || !to) throw new BadRequestException('Missing required query parameters');
 
     return this.installsService.getMetadataByDateRange(from, to);
