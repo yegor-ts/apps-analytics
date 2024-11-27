@@ -6,8 +6,12 @@ import { InstallsController } from './installs.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Installs])],
-  providers: [InstallsService],
-  exports: [InstallsService],
+  providers: [
+    {
+      provide: 'InstallsServiceInterface',
+      useClass: InstallsService,
+    },
+  ],
   controllers: [InstallsController],
 })
 export class InstallsModule {}

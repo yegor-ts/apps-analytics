@@ -8,7 +8,7 @@
       "quotemark": [true, "single"],
       "member-access": [false],
       "ordered-imports": [true],
-      "max-line-length": [true, 150],
+      "max-line-length": [true, 120],
       "member-ordering": [false],
       "interface-name": [false],
       "no-string-literal": false,

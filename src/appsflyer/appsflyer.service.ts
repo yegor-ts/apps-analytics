@@ -5,10 +5,11 @@ import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Installs } from 'src/installs/entities/installs.entity';
+import { AppsflyerServiceInterface } from './types/appsflyer.service.interface';
 import * as csv from 'csv-parser';
 
 @Injectable()
-export class AppsflyerService {
+export class AppsflyerService implements AppsflyerServiceInterface {
   private readonly apiToken = this.configService.get('API_TOKEN');
   private readonly baseUrl = this.configService.get('API_URL');
   private readonly logger = new Logger(AppsflyerService.name);
@@ -21,7 +22,7 @@ export class AppsflyerService {
   ) {}
 
   @Cron(CronExpression.EVERY_30_SECONDS)
-  async fetchData() {
+  async fetchData(): Promise<void> {
     const BATCH_SIZE = 100;
 
     const requestUrl = `${this.baseUrl}key=${this.apiToken}`;
@@ -45,10 +46,7 @@ export class AppsflyerService {
               await this.installsRepository.save(batch);
               batch = [];
             } catch (error) {
-              throw new HttpException(
-                error.message,
-                HttpStatus.INTERNAL_SERVER_ERROR,
-              );
+              throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
             } finally {
               csvStream.resume();
             }
@@ -61,17 +59,11 @@ export class AppsflyerService {
             }
             this.logger.log('Successfully fetched and saved to the database');
           } catch (error) {
-            throw new HttpException(
-              error.message,
-              HttpStatus.INTERNAL_SERVER_ERROR,
-            );
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
           }
         })
         .on('error', (error) => {
-          throw new HttpException(
-            error.message,
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+          throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_GATEWAY);

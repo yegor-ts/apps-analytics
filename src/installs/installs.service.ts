@@ -2,10 +2,11 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Installs } from './entities/installs.entity';
+import { InstallsServiceInterface } from './types/installs-service.interface';
 import { InstallStats, CityDistribution } from './types/installs.types';
 
 @Injectable()
-export class InstallsService {
+export class InstallsService implements InstallsServiceInterface {
   constructor(
     @InjectRepository(Installs)
     private readonly installsRepository: Repository<Installs>,
@@ -24,9 +25,7 @@ export class InstallsService {
     }
   }
 
-  async getInstallsByApp(
-    appName: string,
-  ): Promise<{ total_installs: number; city_distribution: CityDistribution }> {
+  async getInstallsByApp(appName: string): Promise<{ total_installs: number; city_distribution: CityDistribution }> {
     try {
       const totalInstalls = await this.installsRepository
         .createQueryBuilder('installs')
@@ -52,9 +51,7 @@ export class InstallsService {
         city_distribution: cityDistribution,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed processing installs by app',
-      );
+      throw new InternalServerErrorException('Failed processing installs by app');
     }
   }
 
@@ -80,16 +77,11 @@ export class InstallsService {
         total_installs: parseInt(row.total_installs, 10),
       }));
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to fetch application installs by time',
-      );
+      throw new InternalServerErrorException('Failed to fetch application installs by time');
     }
   }
 
-  async getInstallsByDevice(
-    from: string,
-    to: string,
-  ): Promise<{ device_model: string; installs: number }[]> {
+  async getInstallsByDevice(from: string, to: string): Promise<{ device_model: string; installs: number }[]> {
     try {
       const result = await this.installsRepository
         .createQueryBuilder('installs')
@@ -106,15 +98,11 @@ export class InstallsService {
         installs: row.installs,
       }));
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to fetch installs by device',
-      );
+      throw new InternalServerErrorException('Failed to fetch installs by device');
     }
   }
 
-  async getGeoAnalysis(
-    appName: string,
-  ): Promise<{ city: string; installs: number }[]> {
+  async getGeoAnalysis(appName: string): Promise<{ city: string; installs: number }[]> {
     try {
       const result = await this.installsRepository
         .createQueryBuilder('installs')
@@ -130,9 +118,7 @@ export class InstallsService {
         installs: parseInt(row.installs, 10),
       }));
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to process geographic analysis data',
-      );
+      throw new InternalServerErrorException('Failed to process geographic analysis data');
     }
   }
 
@@ -164,16 +150,11 @@ export class InstallsService {
         percentage_with_lat_enabled: percentageWithLatEnabled,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to fetch idfv distribution data',
-      );
+      throw new InternalServerErrorException('Failed to fetch idfv distribution data');
     }
   }
 
-  async getMetadataByDateRange(
-    from: string,
-    to: string,
-  ): Promise<Partial<Installs>[]> {
+  async getMetadataByDateRange(from: string, to: string): Promise<Partial<Installs>[]> {
     try {
       return await this.installsRepository
         .createQueryBuilder('installs')
@@ -188,9 +169,7 @@ export class InstallsService {
         .orderBy('installs.date', 'ASC')
         .getRawMany();
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to fetch installs metadata',
-      );
+      throw new InternalServerErrorException('Failed to fetch installs metadata');
     }
   }
 }
