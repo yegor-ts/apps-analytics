@@ -41,6 +41,22 @@ This is a Back-end application designed to provide analytics data on application
     ```bash
     npm start
 
+## Database
+
+This project uses **PostgreSQL** as the database. Ensure **PostgreSQL** is installed and running before proceeding.
+Configure the following environment variables in a `.env` file located in the root of the project:
+
+Example `.env` file:
+
+```
+DB_HOST=
+DB_PORT=
+DB_USERNAME=
+DB_PASSWORD=
+DB_DATABASE=
+DB_SYNCHRONIZE=true
+```
+
 ## Testing 
 
 This project includes **unit tests** to ensure the application modules work as expected. See details below how to run tests.
