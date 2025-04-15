@@ -1,12 +1,16 @@
-import { BadRequestException } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InstallsController } from './installs.controller';
 import { InstallsServiceInterface } from './types/installs-service.interface';
 import { CityDistribution, InstallStats } from './types/installs.types';
+import { AppNameDto } from './dto/app-name.dto';
+import { AppDateRangeDto } from './dto/app-date-range.dto';
+import { DateRangeDto } from './dto/date-range.dto';
 
 describe('InstallsController', () => {
   let controller: InstallsController;
   let installsService: jest.Mocked<InstallsServiceInterface>;
+  let validationPipe: ValidationPipe;
 
   beforeEach(async () => {
     installsService = {
@@ -30,6 +34,11 @@ describe('InstallsController', () => {
     }).compile();
 
     controller = module.get<InstallsController>(InstallsController);
+    validationPipe = new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
   });
 
   it('should be defined', () => {
@@ -57,17 +66,25 @@ describe('InstallsController', () => {
           London: 50,
         } as CityDistribution,
       };
+      const validDto = { app_name: 'Fix San' };
       installsService.getInstallsByApp.mockResolvedValue(mockResponse);
 
-      const result = await controller.getInstallsByApp('Fix San');
+      const result = await controller.getInstallsByApp(validDto);
 
       expect(result).toEqual(mockResponse);
-      expect(installsService.getInstallsByApp).toHaveBeenCalled();
+      expect(installsService.getInstallsByApp).toHaveBeenCalledWith('Fix San');
     });
 
     it('should throw BadRequestException if app name is missing', async () => {
-      await expect(controller.getInstallsByApp('')).rejects.toThrow(BadRequestException);
-      expect(installsService.getInstallsByApp).not.toHaveBeenCalled();
+      const invalidDto = { app_name: '' };
+
+      try {
+        await validationPipe.transform(invalidDto, { type: 'query', metatype: AppNameDto });
+        fail('ValidationPipe should throw an exception');
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(installsService.getInstallsByApp).not.toHaveBeenCalled();
+      }
     });
   });
 
@@ -77,17 +94,29 @@ describe('InstallsController', () => {
         { period: '2024-01-01', total_installs: 10 },
         { period: '2024-01-02', total_installs: 20 },
       ];
+      const validDto = {
+        app_name: 'Fix San',
+        from: '2024-05-01',
+        to: '2024-05-10',
+      };
       installsService.getAppInstallsByTime.mockResolvedValue(mockResponse);
 
-      const result = await controller.getAppInstallsByTime('Fix San', '2024-05-01', '2024-05-10');
+      const result = await controller.getAppInstallsByTime(validDto);
 
       expect(result).toEqual(mockResponse);
-      expect(installsService.getAppInstallsByTime).toHaveBeenCalled();
+      expect(installsService.getAppInstallsByTime).toHaveBeenCalledWith('Fix San', '2024-05-01', '2024-05-10');
     });
 
     it('should throw BadRequestException if any required parameter is missing', async () => {
-      await expect(controller.getAppInstallsByTime('', '', '')).rejects.toThrow(BadRequestException);
-      expect(installsService.getAppInstallsByTime).not.toHaveBeenCalled();
+      const invalidDto = { app_name: '', from: '', to: '' };
+
+      try {
+        await validationPipe.transform(invalidDto, { type: 'query', metatype: AppDateRangeDto });
+        fail('ValidationPipe should throw an exception');
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(installsService.getAppInstallsByTime).not.toHaveBeenCalled();
+      }
     });
   });
 
@@ -103,17 +132,25 @@ describe('InstallsController', () => {
           installs: 10,
         },
       ];
+      const validDto = { from: '2024-05-01', to: '2024-05-10' };
       installsService.getInstallsByDevice.mockResolvedValue(mockResponse);
 
-      const result = await controller.getInstallsByDevices('2024-05-01', '2024-05-10');
+      const result = await controller.getInstallsByDevices(validDto);
 
       expect(result).toEqual(mockResponse);
-      expect(installsService.getInstallsByDevice).toHaveBeenCalled();
+      expect(installsService.getInstallsByDevice).toHaveBeenCalledWith('2024-05-01', '2024-05-10');
     });
 
     it('should throw BadRequestException if any required parameter is missing', async () => {
-      await expect(controller.getInstallsByDevices('', '')).rejects.toThrow(BadRequestException);
-      expect(installsService.getInstallsByDevice).not.toHaveBeenCalled();
+      const invalidDto = { from: '', to: '' };
+
+      try {
+        await validationPipe.transform(invalidDto, { type: 'query', metatype: DateRangeDto });
+        fail('ValidationPipe should throw an exception');
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(installsService.getInstallsByDevice).not.toHaveBeenCalled();
+      }
     });
   });
 
@@ -129,17 +166,25 @@ describe('InstallsController', () => {
           installs: 1,
         },
       ];
+      const validDto = { app_name: 'Fix San' };
       installsService.getGeoAnalysis.mockResolvedValue(mockResponse);
 
-      const result = await controller.getGeoAnalysis('Fix San');
+      const result = await controller.getGeoAnalysis(validDto);
 
       expect(result).toEqual(mockResponse);
-      expect(installsService.getGeoAnalysis).toHaveBeenCalled();
+      expect(installsService.getGeoAnalysis).toHaveBeenCalledWith('Fix San');
     });
 
     it('should throw BadRequestException if app_name is missing', async () => {
-      await expect(controller.getGeoAnalysis('')).rejects.toThrow(BadRequestException);
-      expect(installsService.getGeoAnalysis).not.toHaveBeenCalled();
+      const invalidDto = { app_name: '' };
+
+      try {
+        await validationPipe.transform(invalidDto, { type: 'query', metatype: AppNameDto });
+        fail('ValidationPipe should throw an exception');
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(installsService.getGeoAnalysis).not.toHaveBeenCalled();
+      }
     });
   });
 
@@ -153,17 +198,25 @@ describe('InstallsController', () => {
         },
         percentage_with_lat_enabled: 50,
       };
+      const validDto = { app_name: 'Fix San' };
       installsService.getIdfvDistribution.mockResolvedValue(mockResponse);
 
-      const result = await controller.getIdfvDistribution('Fix San');
+      const result = await controller.getIdfvDistribution(validDto);
 
       expect(result).toEqual(mockResponse);
-      expect(installsService.getIdfvDistribution).toHaveBeenCalled();
+      expect(installsService.getIdfvDistribution).toHaveBeenCalledWith('Fix San');
     });
 
     it('should throw BadRequestException if app_name is missing', async () => {
-      await expect(controller.getIdfvDistribution('')).rejects.toThrow(BadRequestException);
-      expect(installsService.getIdfvDistribution).not.toHaveBeenCalled();
+      const invalidDto = { app_name: '' };
+
+      try {
+        await validationPipe.transform(invalidDto, { type: 'query', metatype: AppNameDto });
+        fail('ValidationPipe should throw an exception');
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(installsService.getIdfvDistribution).not.toHaveBeenCalled();
+      }
     });
   });
 
@@ -180,17 +233,25 @@ describe('InstallsController', () => {
           date: new Date('2024-04-01'),
         },
       ];
+      const validDto = { from: '2024-05-01', to: '2024-05-10' };
       installsService.getMetadataByDateRange.mockResolvedValue(mockResponse);
 
-      const result = await controller.getInstallsMetadata('2024-05-01', '2024-05-10');
+      const result = await controller.getInstallsMetadata(validDto);
 
       expect(result).toEqual(mockResponse);
-      expect(installsService.getMetadataByDateRange).toHaveBeenCalled();
+      expect(installsService.getMetadataByDateRange).toHaveBeenCalledWith('2024-05-01', '2024-05-10');
     });
-  });
 
-  it('should throw BadRequestException if any required parameter is missing', async () => {
-    await expect(controller.getInstallsMetadata('', '')).rejects.toThrow(BadRequestException);
-    expect(installsService.getMetadataByDateRange).not.toHaveBeenCalled();
+    it('should throw BadRequestException if any required parameter is missing', async () => {
+      const invalidDto = { from: '', to: '' };
+
+      try {
+        await validationPipe.transform(invalidDto, { type: 'query', metatype: DateRangeDto });
+        fail('ValidationPipe should throw an exception');
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(installsService.getMetadataByDateRange).not.toHaveBeenCalled();
+      }
+    });
   });
 });
