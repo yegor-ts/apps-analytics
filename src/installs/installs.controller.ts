@@ -1,14 +1,11 @@
-import { BadRequestException, Controller, Get, Inject, Query } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiInternalServerErrorResponse,
-  ApiOkResponse,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Get, Inject, Query } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Installs } from './entities/installs.entity';
 import { InstallsServiceInterface } from './types/installs-service.interface';
 import { CityDistribution, InstallStats } from './types/installs.types';
+import { AppNameDto } from './dto/app-name.dto';
+import { DateRangeDto } from './dto/date-range.dto';
+import { AppDateRangeDto } from './dto/app-date-range.dto';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -30,11 +27,6 @@ export class InstallsController {
   }
 
   @Get('/installs-by-app')
-  @ApiQuery({
-    name: 'app_name',
-    type: String,
-    required: true,
-  })
   @ApiOkResponse({
     description: 'Installs by app have been successfuly fetched.',
   })
@@ -45,29 +37,12 @@ export class InstallsController {
     description: 'Internal Server Error. An unexpected error occurred.',
   })
   async getInstallsByApp(
-    @Query('app_name') appName: string,
+    @Query() appNameDto: AppNameDto,
   ): Promise<{ total_installs: number; city_distribution: CityDistribution }> {
-    if (!appName) throw new BadRequestException('The app_name parameter is required');
-
-    return this.installsService.getInstallsByApp(appName);
+    return this.installsService.getInstallsByApp(appNameDto.app_name);
   }
 
   @Get('/installs-by-time')
-  @ApiQuery({
-    name: 'app_name',
-    type: String,
-    required: true,
-  })
-  @ApiQuery({
-    name: 'from',
-    type: String,
-    required: true,
-  })
-  @ApiQuery({
-    name: 'to',
-    type: String,
-    required: true,
-  })
   @ApiOkResponse({
     description: 'Installs by time interval have been successfuly fetched.',
   })
@@ -78,26 +53,16 @@ export class InstallsController {
     description: 'Internal Server Error. An unexpected error occurred.',
   })
   async getAppInstallsByTime(
-    @Query('app_name') appName: string,
-    @Query('from') from: string,
-    @Query('to') to: string,
+    @Query() appDateRangeDto: AppDateRangeDto,
   ): Promise<{ period: string; total_installs: number }[]> {
-    if (!appName || !from || !to) throw new BadRequestException('Missing required query parameters');
-
-    return this.installsService.getAppInstallsByTime(appName, from, to);
+    return this.installsService.getAppInstallsByTime(
+      appDateRangeDto.app_name,
+      appDateRangeDto.from,
+      appDateRangeDto.to,
+    );
   }
 
   @Get('/installs-by-device')
-  @ApiQuery({
-    name: 'from',
-    type: String,
-    required: true,
-  })
-  @ApiQuery({
-    name: 'to',
-    type: String,
-    required: true,
-  })
   @ApiOkResponse({
     description: 'Installs by devices have been successfuly fetched.',
   })
@@ -108,20 +73,12 @@ export class InstallsController {
     description: 'Internal Server Error. An unexpected error occurred.',
   })
   async getInstallsByDevices(
-    @Query('from') from: string,
-    @Query('to') to: string,
+    @Query() dateRangeDto: DateRangeDto,
   ): Promise<{ device_model: string; installs: number }[]> {
-    if (!from || !to) throw new BadRequestException('Missing required query parameters');
-
-    return this.installsService.getInstallsByDevice(from, to);
+    return this.installsService.getInstallsByDevice(dateRangeDto.from, dateRangeDto.to);
   }
 
   @Get('/geo-analysis')
-  @ApiQuery({
-    name: 'app_name',
-    type: String,
-    required: true,
-  })
   @ApiOkResponse({
     description: 'Successfully fetched the geographical distribution of installs.',
   })
@@ -131,18 +88,11 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  async getGeoAnalysis(@Query('app_name') appName: string): Promise<{ city: string; installs: number }[]> {
-    if (!appName) throw new BadRequestException('The app_name parameter is required');
-
-    return this.installsService.getGeoAnalysis(appName);
+  async getGeoAnalysis(@Query() appNameDto: AppNameDto): Promise<{ city: string; installs: number }[]> {
+    return this.installsService.getGeoAnalysis(appNameDto.app_name);
   }
 
   @Get('/idfv-distribution')
-  @ApiQuery({
-    name: 'app_name',
-    type: String,
-    required: true,
-  })
   @ApiOkResponse({
     description: 'Idfv distribution has been successfuly fetched.',
   })
@@ -152,23 +102,11 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  async getIdfvDistribution(@Query('app_name') appName: string): Promise<InstallStats> {
-    if (!appName) throw new BadRequestException('The app_name parameter is required');
-
-    return this.installsService.getIdfvDistribution(appName);
+  async getIdfvDistribution(@Query() appNameDto: AppNameDto): Promise<InstallStats> {
+    return this.installsService.getIdfvDistribution(appNameDto.app_name);
   }
 
   @Get('/installs-metadata')
-  @ApiQuery({
-    name: 'from',
-    type: String,
-    required: true,
-  })
-  @ApiQuery({
-    name: 'to',
-    type: String,
-    required: true,
-  })
   @ApiOkResponse({
     description: 'Install metadata have been successfuly fetched.',
   })
@@ -178,9 +116,7 @@ export class InstallsController {
   @ApiInternalServerErrorResponse({
     description: 'Internal Server Error. An unexpected error occurred.',
   })
-  async getInstallsMetadata(@Query('from') from: string, @Query('to') to: string): Promise<Partial<Installs>[]> {
-    if (!from || !to) throw new BadRequestException('Missing required query parameters');
-
-    return this.installsService.getMetadataByDateRange(from, to);
+  async getInstallsMetadata(@Query() dateRangeDto: DateRangeDto): Promise<Partial<Installs>[]> {
+    return this.installsService.getMetadataByDateRange(dateRangeDto.from, dateRangeDto.to);
   }
 }
